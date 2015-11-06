@@ -1,8 +1,12 @@
+import logging
+import datetime
+import os
+import urllib
+
+# imports to use selenium
 import selenium
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from xvfbwrapper import Xvfb    # artificial display for headless experiments
-import logging
 
 # imports to parse easylist
 from adblockparser import AdblockRules
@@ -26,9 +30,14 @@ class AdbTestUnit:
         if headless:
             self.vdisplay = Xvfb(width=1280, height=720)
             self.vdisplay.start()
+
         self.driver = webdriver.Firefox(
                 firefox_binary = webdriver.firefox.firefox_binary.FirefoxBinary(
                 log_file = open ('/tmp/selenium.log', 'w')))
+
+        self.dir_name = "log_"+datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        if not os.path.exists(self.dir_name):
+            os.makedirs(self.dir_name)
 
         logging.basicConfig(filename='log.adbtest_unit.txt',level=logging.DEBUG)
         if easyList:
@@ -42,20 +51,37 @@ class AdbTestUnit:
         logging.info("Trying: {}".format(url))
         driver.get(url)
         logging.info("Visited: {}".format(url))
-
+        self.screenshot = self.screenshot_page()
+    
+    def screenshot_page(self):
+        # uses PIL library to open image in memory
+        driver = self.driver
+        b64_shot = driver.get_screenshot_as_base64()
+        decode  = base64.decodestring(b64_shot)
+        s = StringIO.StringIO(decode)
+        img = Image.open(s)
+        return img
 
     def log_element(self,element,source):
         url = element.get_attribute(source)
         logging.info("Ad:{}:{}".format(source, url))
 
-        #print "Blocked type {} at address {}".format(source, url)
         print("Element: {}".format(element))
-        #print("inner-html: {}".format(element.get_attribute('innerHTML')))
-        #print("inner-text: {}".format(element.get_attribute('innerText')))
-        #print("text-content".format(element.get_attribute('textContent')))
         print("outer-html: {}".format(element.get_attribute('outerHTML').encode('utf-8')))
+        print("tag-name: {}".format(element.tag_name))
         print "="*80
-        #self.screen_shot_element(element=e,name=str(count))
+
+        try:
+            if element.tag_name == "img":
+                urllib.urlretrieve(url, self.dir_name+"/image_"+str(element.id))
+            elif element.tag_name == "a":
+                a_img =  element.get_attribute("img")
+                if a_img != None:
+                    urllib.urlretrieve(url, self.dir_name+"/a_image_"+str(element.id))
+            elif element.tag_name == "iframe":
+                self.screen_shot_element(element)
+        except:
+            print "error saving element"
 
 
     def check_elements(self, elements, source="href", options=None):
@@ -66,6 +92,7 @@ class AdbTestUnit:
                 logging.info("Checking:{}:{}".format(source, url))
                 if self.rules.should_block(url, options):
                     self.log_element(e,source)
+
                     count+=1
             except selenium.common.exceptions.StaleElementReferenceException as e:
                 logging.error(e)
@@ -84,8 +111,7 @@ class AdbTestUnit:
         count = self.check_elements(elements, "src", self.all_options)
         print "src search found: {}".format(count)
 
-    def screen_shot_element(self, element,name):
-        driver = self.driver
+    def screen_shot_element(self, element):
 
         location = element.location
         size = element.size
@@ -100,16 +126,12 @@ class AdbTestUnit:
         if left == 0 or top == 0 or right == 0 or bottom == 0  or size['width'] == 0 or size['height'] ==0:
             print "bad element size"
             return
-
-        b64_shot = driver.get_screenshot_as_base64()
-        decode  = base64.decodestring(b64_shot)
-        s = StringIO.StringIO(decode)
-        img = Image.open(s)
-        #im = Image.open('screenshot.png') # uses PIL library to open image in memory
-
-        img = img.crop((left, top, right, bottom)) # defines crop points
-        img.save('screenshot'+name+'.png') # saves new cropped image
-
+        
+        try:
+            img = img.crop((left, top, right, bottom)) # defines crop points
+            img.save(self.dir_name+'/iframe_'+str(element.id)+'.png') # saves new cropped image
+        except:
+            print "exception while clipping"
 
 
 def treat_cmd(browser, cmd):
