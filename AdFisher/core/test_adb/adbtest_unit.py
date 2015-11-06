@@ -109,6 +109,10 @@ class AdbTestUnit:
         count = self.check_elements(elements, "src", self.all_options)
         print "src search found: {}".format(count)
 
+    def find_ads(self):
+        find_href_ads()
+        find_src_ads()
+
     def screen_shot_element(self, element):
 
         location = element.location
