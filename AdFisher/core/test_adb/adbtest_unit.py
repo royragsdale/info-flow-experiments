@@ -1,10 +1,17 @@
+import selenium
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from xvfbwrapper import Xvfb    # artificial display for headless experiments
 import logging
+
+# imports to parse easylist
 from adblockparser import AdblockRules
 from adblockparser import AdblockRule
 
+# imports to save screen shots
+from PIL import Image
+import StringIO
+import base64
 
 class AdbTestUnit:
 
@@ -36,55 +43,74 @@ class AdbTestUnit:
         driver.get(url)
         logging.info("Visited: {}".format(url))
 
-    def check_block(self, url, source="href", options=None):
-        logging.info("Checking:{}:{}".format(source, url))
-        if self.rules.should_block(url, options):
-            print "Blocked type {} at address {}".format(source, url)
-            logging.info("Ad:{}:{}".format(source, url))
-            return True
-        return False
+
+    def log_element(self,element,source):
+        url = element.get_attribute(source)
+        logging.info("Ad:{}:{}".format(source, url))
+
+        #print "Blocked type {} at address {}".format(source, url)
+        print("Element: {}".format(element))
+        #print("inner-html: {}".format(element.get_attribute('innerHTML')))
+        #print("inner-text: {}".format(element.get_attribute('innerText')))
+        #print("text-content".format(element.get_attribute('textContent')))
+        print("outer-html: {}".format(element.get_attribute('outerHTML').encode('utf-8')))
+        print "="*80
+        #self.screen_shot_element(element=e,name=str(count))
+
+
+    def check_elements(self, elements, source="href", options=None):
+        count = 0
+        for e in elements:
+            try:
+                url = e.get_attribute(source)
+                logging.info("Checking:{}:{}".format(source, url))
+                if self.rules.should_block(url, options):
+                    self.log_element(e,source)
+                    count+=1
+            except selenium.common.exceptions.StaleElementReferenceException as e:
+                logging.error(e)
+        return count
 
     def find_href_ads(self):
         driver = self.driver
-        links = driver.find_elements_by_xpath("//*[@href]")
-        links = set([link.get_attribute("href") for link in links])
-        count = 0
-        options = self.all_options
-        for link in links:
-            if self.check_block(url=link, options=options):
-                count+=1
+        elements = driver.find_elements_by_xpath("//*[@href]")
+        count = self.check_elements(elements,"href", self.all_options)
         print "href search found: {}".format(count)
+    
 
     def find_src_ads(self):
         driver = self.driver
-        links = driver.find_elements_by_xpath("//*[@src]")
-        links = set([link.get_attribute("src") for link in links])
-        count = 0
-        options = self.all_options
-        for link in links:
-            if self.check_block(url=link, source="src", options=options):
-                count+=1
+        elements = driver.find_elements_by_xpath("//*[@src]")
+        count = self.check_elements(elements, "src", self.all_options)
         print "src search found: {}".format(count)
 
-    def check_tag(self,tag_name):
+    def screen_shot_element(self, element,name):
         driver = self.driver
-        tags = driver.find_elements_by_tag_name(tag_name)
-        urls = set([link.get_attribute("src") for link in tags])
-        logging.info("number of tags:{}:{}".format(tag_name,len(urls)))
-        count = 0
-        options = {'script': True,'image': True}
-        for link in urls:
-            if link != None and "http" in link:
-                if self.check_block(url=link, source=tag_name, options=options):
-                    count+=1
-            else:
-                logging.info("Discarding:{}:{}".format(tag_name,link))
-        print "{} search found: {}".format(tag_name,count)
+
+        location = element.location
+        size = element.size
+        
+        left = location['x']
+        top = location['y']
+        right = location['x'] + size['width']
+        bottom = location['y'] + size['height']
+
+        print("{} {} : {} {}".format(left,top,right,bottom))
+
+        if left == 0 or top == 0 or right == 0 or bottom == 0  or size['width'] == 0 or size['height'] ==0:
+            print "bad element size"
+            return
+
+        b64_shot = driver.get_screenshot_as_base64()
+        decode  = base64.decodestring(b64_shot)
+        s = StringIO.StringIO(decode)
+        img = Image.open(s)
+        #im = Image.open('screenshot.png') # uses PIL library to open image in memory
+
+        img = img.crop((left, top, right, bottom)) # defines crop points
+        img.save('screenshot'+name+'.png') # saves new cropped image
 
 
-    def screenshot(self,filename):
-        driver = self.driver
-        driver.save_screenshot(filename)
 
 def treat_cmd(browser, cmd):
     if cmd[0] == "visit":
