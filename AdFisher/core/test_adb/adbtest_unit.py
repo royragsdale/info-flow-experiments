@@ -107,7 +107,6 @@ class AdbTestUnit:
 
         self.data[url] = row
         
-        '''
         try:
             if tag == "img":
                 urllib.urlretrieve(url, os.path.join(self.log_dir,"image_"+str(element.id)))
@@ -119,7 +118,6 @@ class AdbTestUnit:
                 self.screen_shot_element(element)
         except:
             logging.error("Collecting enhanced contents:{}:{}:{}".format(self.session,element.id,tag))
-        '''
 
 
     def check_elements(self, elements, source, options=None):
@@ -171,8 +169,8 @@ class AdbTestUnit:
         '''
         Convenience function to use all ad identification mechanisms
         '''
-        find_href_ads()
-        find_src_ads()
+        self.find_href_ads()
+        self.find_src_ads()
 
     def screen_shot_element(self, element):
         '''
@@ -198,6 +196,59 @@ class AdbTestUnit:
             img.save(os.path.join(self.log_dir,'iframe_'+str(element.id)+'.png')) # saves new cropped image
         except:
             logging.error("clipping screenshot:{}:{}".format(self.session,element.id))
+
+
+    def check_iframes(self,parents=()):
+        '''
+        expect to enter at the level defined by parents
+        collect subframes and loop
+            enter subframe
+            return to level defined by parents
+        returns to top level
+        '''
+
+        driver = self.driver
+        children = driver.find_elements_by_tag_name('iframe')
+
+        for child in children:
+            child_name = child.get_attribute('name').encode('utf-8')
+            #print " "*len(parents)+"child:{}".format(child_name[:80])
+
+            xpath = '//iframe[@name="{}"]'.format(child_name)
+            try:
+                c_elem = driver.find_element_by_xpath(xpath)
+                driver.switch_to.frame(c_elem)
+
+                # check in the iframe for ads
+                #self.find_href_ads()
+                self.find_ads()
+                
+                # set parent for children we check
+                nesting = parents + (child_name,)
+                self.check_iframes(parents=nesting)
+            except selenium.common.exceptions.NoSuchElementException as e:
+                # if selenium was unable to `find_element_by_xpath` than we just skip it
+                # we rely on `find_element_by_xpath` to naviagate between nested levels
+                continue
+
+            # return to correct level of nesting
+            driver.switch_to_default_content()
+            for p in parents:
+                parent_xpath = '//iframe[@name="{}"]'.format(p)
+                try:
+                    p_elem = driver.find_element_by_xpath(parent_xpath)
+                    driver.switch_to.frame(p_elem)
+                except selenium.common.exceptions.NoSuchElementException as e:
+                    # this should not occur becasue above we correctly bail on iframes
+                    # we can't navigate by "name", but just in case, preserve invaraint
+                    # of function leaving at top level
+                    logging.error("resetting level in iframe recursion")
+                    driver.switch_to_default_content()
+
+
+        driver.switch_to_default_content()
+
+
 
     def print_title(self,search=None):
         for k,v in self.data.iteritems():
