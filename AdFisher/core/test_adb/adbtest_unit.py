@@ -149,14 +149,14 @@ class AdbTestUnit:
         '''
         self.find_href_ads()
         self.find_src_ads()
+        self.check_iframes()
 
     def check_iframes(self,parents=()):
         '''
-        expect to enter at the level defined by parents
-        collect subframes and loop
-            enter subframe
-            return to level defined by parents
-        returns to top level
+        Functionality to check within nested iframes for ad related resources.
+        Invariants: expects webdriver to enter at the level defined by parents
+        resets webdriver to top level contents prior to leaving
+        Input: a tuple describing the iframe name atrribute of parent levels
         '''
 
         driver = self.driver
@@ -201,6 +201,7 @@ class AdbTestUnit:
                     driver.switch_to_default_content()
 
 
+        # always reset to top level content prior to exiting
         driver.switch_to_default_content()
 
 
