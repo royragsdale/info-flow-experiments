@@ -63,7 +63,7 @@ class AdbTestUnit:
         driver.get(url)
         logging.info("Visited: {}".format(url))
     
-       def log_element(self,element,source):
+    def log_element(self,element,source):
         '''
         Input: An element that has been identified as an ad and how it was identified
         Result: Inserts appropriate information into the log
