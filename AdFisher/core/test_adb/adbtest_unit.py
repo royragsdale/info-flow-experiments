@@ -75,16 +75,19 @@ class AdbTestUnit:
         link_location = element.location
         url_query = urlparse(url).query
         query_args = parse_qs(url_query)
-        #logging.info("Ad:Contents:{}:{}:{}".format(self.session, element.id, html))
-        
-        
+         
+        # update internal datastore
         element_data = (url,tag,link_text,link_location,query_args)
         if url in self.data:
             row = self.data[url]
             row.append(element_data)
         else:
             row = [element_data,]
+        
+        # store to internal datastructure
+        self.data[url] = row
 
+        # store log line
         logging.info("Ad:Data:{}".format(element_data))
 
         try:
