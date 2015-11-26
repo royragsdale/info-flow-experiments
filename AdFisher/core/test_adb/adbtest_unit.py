@@ -46,18 +46,21 @@ class AdbTestUnit:
         tmp_version = self._easylist_version(path=tmp_easylist)
         
         # if nessecary update
-        if tmp_version > cur_version:
+        if tmp_version > cur_version and cur_version != -1:
             os.remove(self.EASYLIST)
             shutil.move(tmp_easylist,self.EASYLIST)
             logging.info("Updated easylist from {} to {}".format(cur_version,tmp_version))
+        elif cur_version == -1:
+            shutil.move(tmp_easylist,self.EASYLIST)
+            logging.info("New easylist {}".format(tmp_version))
         else:
             os.remove(tmp_easylist)
-            logging.info("easylist already up to date at: {}".format(cur_version))
+            logging.info("Easylist already up to date at: {}".format(tmp_version))
 
     def _load_easylist(self):
-        with open('easylist.txt') as f:
+        with open(self.EASYLIST) as f:
             lines = f.read().splitlines()
-        logging.info("Loaded easy list: {} items".format(len(lines)))
+        logging.info("Loaded easylist version: {} with : {} items".format(self._easylist_version(),len(lines)))
         return lines
 
 
@@ -80,6 +83,7 @@ class AdbTestUnit:
         
         # load easylist
         if easyList:
+            self._fetch_easylist()
             self.rules = AdblockRules(self._load_easylist())
             self.all_options = {opt:True for opt in AdblockRule.BINARY_OPTIONS}
         else:
