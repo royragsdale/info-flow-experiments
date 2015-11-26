@@ -78,7 +78,8 @@ class AdbTestUnit:
         query_args = parse_qs(url_query)
          
         # update internal datastore
-        element_data = (url,tag,link_text,link_location,query_args)
+        #element_data = (url,tag,link_text,link_location,query_args)
+        element_data = (link_text,link_location,tag)
         if url in self.data:
             row = self.data[url]
             row.append(element_data)
@@ -169,16 +170,15 @@ class AdbTestUnit:
                 logging.error(e)
                 break
 
-            try:
-                driver.switch_to.frame(child)
+            driver.switch_to.frame(child)
 
-                # check in the iframe for ads
-                self.find_href_ads()
-                self.find_src_ads()
+            # check in the iframe for ads
+            self.find_href_ads()
+            self.find_src_ads()
 
-                # set parent for children we check
-                nesting = parents + (child,)
-                self.check_iframes(parents=nesting)
+            # set parent for children we check
+            nesting = parents + (child,)
+            self.check_iframes(parents=nesting)
 
             # return to correct level of nesting
             driver.switch_to_default_content()
