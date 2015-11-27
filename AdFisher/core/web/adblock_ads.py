@@ -263,21 +263,3 @@ class AdBlockUnit(browser_unit.BrowserUnit):
 
             # collect ads
             self.find_ads()
-    
-
-    # element_data = (url,tag,link_text,link_location,query_args)
-    def query_data(self,search=None):
-        for k,v in self.data.iteritems():
-             title=v[0][2]
-             if search != None:
-                 if title==search:
-                     print k[:80]
-                     print "#"*20
-                     for iid, instance in enumerate(v):
-                         print "-"*10
-                         print "iid: ",iid
-                         print "link text: ",instance[1]
-                         for vk,vv in instance[2].iteritems():
-                             print "\t",vk,vv
-             else:
-                 print title
