@@ -101,6 +101,9 @@ class AdBlockUnit(browser_unit.BrowserUnit):
             # internal ad data structure 
             self.data = {}
 
+            # dictionary to memoize url checks
+            self.memo = {}
+
 
     def log_element(self,element,source):
         '''
@@ -156,11 +159,13 @@ class AdBlockUnit(browser_unit.BrowserUnit):
             try:
                 url = e.get_attribute(source)
                 logging.info("Checking:{}:{}".format(source, url))
-               
-                # actually check the url against the filter list
-                if self.rules.should_block(url, options):
-                    self.log_element(e,source)
+                # check if we have ecaluated this ad before
+                if url not in self.memo:
+                    # actually check the url against the filter list
+                    self.memo[url] = self.rules.should_block(url, options)
 
+                if self.memo[url]:
+                    self.log_element(e,source)
                     count+=1
 
             # occurs with stale elements that no longer exist in the DOM
@@ -175,6 +180,7 @@ class AdBlockUnit(browser_unit.BrowserUnit):
         These are considered "text" ads.
         '''
         driver = self.driver
+        ### VERY VERY SLOW
         elements = driver.find_elements_by_xpath("//*[@href]")
         count = self.check_elements(elements,"href", self.all_options)
         print "href search found: {}".format(count)
@@ -187,6 +193,7 @@ class AdBlockUnit(browser_unit.BrowserUnit):
         tags
         '''
         driver = self.driver
+        ### VERY VERY SLOW
         elements = driver.find_elements_by_xpath("//*[@src]")
         count = self.check_elements(elements, "src", self.all_options)
         print "src search found: {}".format(count)
@@ -202,9 +209,9 @@ class AdBlockUnit(browser_unit.BrowserUnit):
 
         driver = self.driver
         children = driver.find_elements_by_tag_name('iframe')
+
         for child in children:
 
-            print("\t"*len(parents)+"at child: {}".format(child))
             try:
                 driver.switch_to.frame(child)
 
@@ -234,7 +241,6 @@ class AdBlockUnit(browser_unit.BrowserUnit):
 
         # always reset to top level content prior to exiting
         driver.switch_to_default_content()
-        #print "exiting"
 
     def find_ads(self):
         '''
@@ -242,7 +248,7 @@ class AdBlockUnit(browser_unit.BrowserUnit):
         '''
         self.check_href()
         self.check_src()
-        self.check_iframe()
+        #self.check_iframe()
 
     def collect_ads(self,url, reloads=1, delay=0, file_name=None):
         '''
