@@ -133,21 +133,6 @@ class AdBlockUnit(browser_unit.BrowserUnit):
         # store log line
         logging.info("Ad:Data:{}".format(element_data))
 
-        # try enhanced collection beyond just url and link text
-        try:
-            if tag == "img":
-                size = element.size
-                # don't save images that are too small
-                if size['width']>=10 and size['height']>10:
-                    urllib.urlretrieve(url, os.path.join(self.log_dir,"image_"+str(element.id)))
-            elif tag == "a":
-                a_img =  element.get_attribute("img")
-                if a_img != None:
-                    urllib.urlretrieve(url, os.path.join(self.log_dir,"a_image_"+str(element.id)))
-        except:
-            logging.error("Collecting enhanced contents:{}:{}:{}".format(self.session,element.id,tag))
-
-
     def check_elements(self, elements, source, options=None):
         '''
         Input: Given an element in the currently active page and an attribute to query on
