@@ -139,15 +139,17 @@ class AdBlockUnit(browser_unit.BrowserUnit):
         for e in elements:
             try:
                 url = e.get_attribute(source)
-                self.logger.debug("Checking:{}:{}".format(source, url))
-                # check if we have ecaluated this ad before
-                if url not in self.memo:
-                    # actually check the url against the filter list
-                    self.memo[url] = self.rules.should_block(url, options)
+                if url != None:
+                    self.logger.debug("Checking:{}:{}".format(source, url))
+                    # check if we have evaluated this ad before
+                    if url not in self.memo:
+                        # actually check the url against the filter list
+                        #print url
+                        self.memo[url] = self.rules.should_block(url, options)
 
-                if self.memo[url]:
-                    self.log_element(e,source)
-                    count+=1
+                    if self.memo[url]:
+                        self.log_element(e,source)
+                        count+=1
 
             # occurs with stale elements that no longer exist in the DOM
             except selenium.common.exceptions.StaleElementReferenceException as e:
@@ -161,7 +163,8 @@ class AdBlockUnit(browser_unit.BrowserUnit):
         These are considered "text" ads.
         '''
         driver = self.driver
-        ### VERY VERY SLOW
+        ### xpath could be less performant than other find_* methods
+        # common tags: <a>,<link>
         elements = driver.find_elements_by_xpath("//*[@href]")
         count = self.check_elements(elements,"href", self.all_options)
         print "href search found: {}".format(count)
@@ -174,7 +177,8 @@ class AdBlockUnit(browser_unit.BrowserUnit):
         tags
         '''
         driver = self.driver
-        ### VERY VERY SLOW
+        ### xpath could be less performant than other find_* methods
+        # common tags: <img>, <iframe>, <frame>, <embed>, <script>
         elements = driver.find_elements_by_xpath("//*[@src]")
         count = self.check_elements(elements, "src", self.all_options)
         print "src search found: {}".format(count)
@@ -229,7 +233,7 @@ class AdBlockUnit(browser_unit.BrowserUnit):
         '''
         self.check_href()
         self.check_src()
-        #self.check_iframe()
+        self.check_iframe()
 
     def collect_ads(self,url, reloads=1, delay=0, file_name=None):
         '''
