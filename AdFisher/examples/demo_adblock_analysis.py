@@ -106,8 +106,6 @@ def group_on_url(data):
         session,ad = row
         url = ad.url
 
-        #row_data =(session,ad.on_site,ad.reloads,ad.link_text)
-        #row_data = (session,ad)
         row_data = ad
         if url in ads_by_url:
              ads_by_url[url].append(row_data)
@@ -153,7 +151,7 @@ def print_by_session(data,printer):
     for session in data:
         unit_id, treatment_id, ad_lines = data[session]
         print "-"*80
-        print("Session/Treatment/Unit: {}/{}/{} : ".format(session,treatment_id,unit_id))
+        print("Session/Treatment/Unit: {}/{}/{} : \n".format(session,treatment_id,unit_id))
         printer(ad_lines)
 
 def simple_print(data):
@@ -161,7 +159,8 @@ def simple_print(data):
     print("{} Sessions".format(len(data)))
     for session in data:
         unit_id, treatment_id, ad_lines = data[session]
-        print("Session/Treatment/Unit: {}/{}/{} : ".format(session,treatment_id,unit_id))
+        print "-"*80
+        print("\nSession/Treatment/Unit: {}/{}/{} : ".format(session,treatment_id,unit_id))
         print("# adlines: {}".format(len(ad_lines)))
         cnt =0
         for ad in ad_lines:
@@ -187,6 +186,9 @@ def main(log_file):
         ad_lines = load_ads_from_json(log_file,session_id)
         data[session_id] = [unit_id, treatment_id,ad_lines]
 
+    print("### Simple Ad Data ###")
+    simple_print(data)
+
     print("\n### Ads grouped by Session ###")
     print_by_session(data,print_by_site_reload)
 
@@ -195,6 +197,8 @@ def main(log_file):
 
     print("\n### Ads grouped by url ###")
     print_url_groups(group_on_url(data))
+
+    print("\n### Ad Matrix ###")
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
