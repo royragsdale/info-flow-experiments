@@ -5,7 +5,11 @@ import json
 from collections import namedtuple
 
 def load_ads_from_json(log_name,session):
-    json_file = os.path.splitext(log_name)[0]+"."+session+".json"
+    # The save file name format is "adb_logfile.session.json
+    dirname = os.path.dirname(log_name)
+    base=os.path.splitext(os.path.basename(log_name))[0][4:]
+    json_name  = base+"."+session+".json" 
+    json_file = os.path.join(dirname,json_name)
     with open(json_file, 'r') as infile:
         raw_ad_lines = json.load(infile)
     
