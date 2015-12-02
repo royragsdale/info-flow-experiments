@@ -4,6 +4,7 @@ import sys
 import json
 from collections import namedtuple
 import csv
+import operator
 
 def load_ads_from_json(log_name,session):
     # The save file name format is "adb_logfile.session.json
@@ -205,14 +206,14 @@ def save_matrix_csv(data, groups, outfile):
     with open(outfile, 'wb') as csvfile:
         writer = csv.writer(csvfile)
         # write headers
-        headers = ["g_id","link_text","urls"]+cols
+        headers = ["g_id","link_text","urls","# link","# url","# obs"]+cols
         writer.writerow(headers)
         for g_id, g in groups.iteritems():
             character, obs = g
             obs_data = group_observed(obs,cols)
             # skip non link text
             link,urls = character
-            csv_line = [g_id,list(link),list(urls)]+obs_data
+            csv_line = [g_id,list(link),list(urls),len(link),len(urls),sum(obs_data)]+obs_data
             writer.writerow(csv_line)
 
         
@@ -227,7 +228,7 @@ def get_all_observation_points(groups):
         character,obs = g
         for o in obs:
             observ.add(o)
-    return sorted(list(observ))
+    return sorted(list(observ),key=operator.itemgetter(0, 2))
 
 def get_ads_with_matching_url(data,url):
     '''
