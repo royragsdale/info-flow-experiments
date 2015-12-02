@@ -13,7 +13,7 @@ adblock_rules = web.adblock_ads.AdBlockUnit(log_file=log_file).rules
 # Defines the browser that will be used as a "unit" and gives it a copy of the adblock_rules
 def make_browser(unit_id, treatment_id):
     b = web.adblock_ads.AdBlockUnit(log_file=log_file, unit_id=unit_id, 
-        treatment_id=treatment_id, headless=False,rules=adblock_rules)
+        treatment_id=treatment_id, headless=True,rules=adblock_rules)
     return b
 
 # Control Group treatment (blank)
@@ -26,7 +26,7 @@ def exp_treatment(unit):
 
 # Measurement - Collects ads
 # checks all the sites that adfisher could previously collect on
-# (~10 minutes for src and href)
+# (~45 minutes)
 def measurement(unit):
 
     # from google_ads
@@ -39,11 +39,14 @@ def measurement(unit):
     
     for site in sites:
         unit.collect_ads(site,reloads=2,delay=5)
+        #unit.visit_url(site)
 
     #from bing_ads
     for site in ["news", "weather", "entertainment", "sports", "money",
                 "lifestyle", "health", "foodanddrink","travel", "autos"]:
+
         unit.collect_ads("http://www.msn.com/en-us/"+site,reloads=2,delay=5)
+        #unit.visit_url("http://www.msn.com/en-us/"+site)
 
 # Shuts down the browser once we are done with it.
 def cleanup_browser(unit):
@@ -61,6 +64,6 @@ def test_stat(observed_values, unit_assignments):
 adfisher.do_experiment(make_unit=make_browser, treatments=[control_treatment, exp_treatment], 
                         measurement=measurement, end_unit=cleanup_browser,
                         load_results=load_results, test_stat=test_stat, ml_analysis=False, 
-                        num_blocks=2, num_units=4, timeout=2000,
+                        num_blocks=1, num_units=4, timeout=3000,
                         log_file=log_file, exp_flag=True, analysis_flag=False, 
                         treatment_names=["control", "experimental"])
