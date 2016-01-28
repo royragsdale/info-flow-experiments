@@ -1,0 +1,16 @@
+2015-12-02 22:40:14.491036||meta||agents||4
+2015-12-02 22:40:14.491073||meta||treatnames||control@|experimental
+2015-12-02 22:40:14.492044||meta||block_id start||0
+2015-12-02 22:40:14.492063||meta||assignment||3@|2@|0@|1
+2015-12-02 22:40:19.043510||event||progress-marker||training-start||3||0
+2015-12-02 22:40:19.044239||event||progress-marker||training-end||3||0
+2015-12-02 22:40:19.205141||event||progress-marker||training-start||2||0
+2015-12-02 22:40:19.205749||event||progress-marker||training-end||2||0
+2015-12-02 22:40:19.289419||event||progress-marker||training-start||0||1
+2015-12-02 22:40:19.290252||event||progress-marker||training-end||0||1
+2015-12-02 22:40:19.711911||event||progress-marker||training-start||1||1
+2015-12-02 22:40:19.712421||event||progress-marker||training-end||1||1
+2015-12-02 22:40:24.054014||event||progress-marker||measurement-start||3||0
+2015-12-02 22:40:24.210586||event||progress-marker||measurement-start||2||0
+2015-12-02 22:40:24.299701||event||progress-marker||measurement-start||0||1
+2015-12-02 22:40:24.720295||event||progress-marker||measurement-start||1||1

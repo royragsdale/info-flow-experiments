@@ -1,0 +1,16 @@
+ERROR:web.adblock_ads:Message: Element is no longer attached to the DOM
+Stacktrace:
+    at fxdriver.cache.getElementAt (resource://fxdriver/modules/web-element-cache.js:9354)
+    at Utils.getElementAt (file:///tmp/tmpJdQAN5/extensions/fxdriver@googlecode.com/components/command-processor.js:8978)
+    at WebElement.getElementAttribute (file:///tmp/tmpJdQAN5/extensions/fxdriver@googlecode.com/components/command-processor.js:12019)
+    at DelayedCommand.prototype.executeInternal_/h (file:///tmp/tmpJdQAN5/extensions/fxdriver@googlecode.com/components/command-processor.js:12534)
+    at DelayedCommand.prototype.executeInternal_ (file:///tmp/tmpJdQAN5/extensions/fxdriver@googlecode.com/components/command-processor.js:12539)
+    at DelayedCommand.prototype.execute/< (file:///tmp/tmpJdQAN5/extensions/fxdriver@googlecode.com/components/command-processor.js:12481)
+ERROR:web.adblock_ads:Message: Element is no longer attached to the DOM
+Stacktrace:
+    at fxdriver.cache.getElementAt (resource://fxdriver/modules/web-element-cache.js:9354)
+    at Utils.getElementAt (file:///tmp/tmpOlG4PW/extensions/fxdriver@googlecode.com/components/driver-component.js:8978)
+    at FirefoxDriver.prototype.switchToFrame (file:///tmp/tmpOlG4PW/extensions/fxdriver@googlecode.com/components/driver-component.js:10716)
+    at DelayedCommand.prototype.executeInternal_/h (file:///tmp/tmpOlG4PW/extensions/fxdriver@googlecode.com/components/command-processor.js:12534)
+    at DelayedCommand.prototype.executeInternal_ (file:///tmp/tmpOlG4PW/extensions/fxdriver@googlecode.com/components/command-processor.js:12539)
+    at DelayedCommand.prototype.execute/< (file:///tmp/tmpOlG4PW/extensions/fxdriver@googlecode.com/components/command-processor.js:12481)
